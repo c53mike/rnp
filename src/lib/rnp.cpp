@@ -5477,8 +5477,7 @@ try {
 
     ret = RNP_SUCCESS;
 done:
-    free_key_pkt(decrypted_seckey);
-    free(decrypted_seckey);
+    delete decrypted_seckey;
     return ret;
 }
 FFI_GUARD
@@ -6273,8 +6272,7 @@ try {
     ret = RNP_SUCCESS;
 
 done:
-    free_key_pkt(decrypted_seckey);
-    free(decrypted_seckey);
+    delete decrypted_seckey;
     return ret;
 }
 FFI_GUARD
