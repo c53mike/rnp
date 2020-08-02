@@ -26,7 +26,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/param.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -36,7 +35,12 @@
 #include <string>
 #include <vector>
 #include <ctype.h>
+#ifdef _MSC_VER
+#include <librepgp/uniwin.h>
+#else
+#include <sys/param.h>
 #include <unistd.h>
+#endif
 
 #ifndef _WIN32
 #include <termios.h>
@@ -847,10 +851,10 @@ cli_rnp_save_keyrings(cli_rnp_t *rnp)
     if (cli_rnp_secformat(rnp) == "G10") {
         struct stat path_stat;
         if (stat(spath.c_str(), &path_stat) != -1) {
-            if (!S_ISDIR(path_stat.st_mode)) {
+            /* TODO: if (!S_ISDIR(path_stat.st_mode)) {
                 ERR_MSG("G10 keystore should be a directory: %s", spath.c_str());
                 return false;
-            }
+            } */
         } else {
             if (errno != ENOENT) {
                 ERR_MSG("stat(%s): %s", spath.c_str(), strerror(errno));

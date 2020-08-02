@@ -27,8 +27,12 @@
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #include <string.h>
+#else
+#include <librepgp/uniwin.h>
+#endif
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <errno.h>
@@ -405,11 +409,11 @@ init_file_src(pgp_source_t *src, const char *path)
         return RNP_ERROR_READ;
     }
 
-    /* read call may succeed on directory depending on OS type */
+    /* TODO: read call may succeed on directory depending on OS type
     if (S_ISDIR(st.st_mode)) {
         RNP_LOG("source is directory");
         return RNP_ERROR_BAD_PARAMETERS;
-    }
+    } */
 
     int flags = O_RDONLY;
 #ifdef HAVE_O_BINARY
@@ -779,13 +783,14 @@ init_file_dest(pgp_dest_t *dst, const char *path, bool overwrite)
             return RNP_ERROR_WRITE;
         }
 
-        /* if we are overwriting empty directory then should first remove it */
+        /* TODO: if we are overwriting empty directory then should first remove it
         if (S_ISDIR(st.st_mode)) {
             if (rmdir(path) == -1) {
                 RNP_LOG("failed to remove directory: error %d", errno);
                 return RNP_ERROR_BAD_PARAMETERS;
             }
         }
+        */
     }
 
     flags = O_WRONLY | O_CREAT;
@@ -856,11 +861,12 @@ file_tmpdst_finish(pgp_dest_t *dst)
         }
 #endif
 
-        /* we should remove dir if overwriting, file will be unlinked in rename call */
+        /* TODO: we should remove dir if overwriting, file will be unlinked in rename call
         if (S_ISDIR(st.st_mode) && rmdir(origpath)) {
             RNP_LOG("failed to remove directory");
             return RNP_ERROR_BAD_STATE;
         }
+        */
     }
 
     if (rename(param->path, origpath)) {

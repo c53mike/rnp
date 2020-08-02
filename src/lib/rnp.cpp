@@ -45,7 +45,11 @@
 #include <rnp/rnp.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+#include "../librepgp/uniwin.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <sys/stat.h>
 #include <stdexcept>
@@ -473,9 +477,16 @@ try {
         goto done;
     }
 
-    ob->key_provider = (pgp_key_provider_t){.callback = ffi_key_provider, .userdata = ob};
+    ob->key_provider =
+#ifndef _MSC_VER
+      (pgp_key_provider_t)
+#endif
+        {.callback = ffi_key_provider, .userdata = ob};
     ob->pass_provider =
-      (pgp_password_provider_t){.callback = rnp_password_cb_bounce, .userdata = ob};
+#ifndef _MSC_VER
+      (pgp_password_provider_t)
+#endif
+        {.callback = rnp_password_cb_bounce, .userdata = ob};
     if (!rng_init(&ob->rng, RNG_DRBG)) {
         ret = RNP_ERROR_RNG;
         goto done;
@@ -1690,7 +1701,7 @@ try {
     if (!ob) {
         return RNP_ERROR_OUT_OF_MEMORY;
     }
-    if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
+    if (stat(path, &st) == 0 /* TODO: && S_ISDIR(st.st_mode) */) {
         // a bit hacky, just save the directory path
         ob->src_directory = strdup(path);
         if (!ob->src_directory) {
@@ -1822,7 +1833,7 @@ try {
     if (!ob) {
         return RNP_ERROR_OUT_OF_MEMORY;
     }
-    if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
+    if (stat(path, &st) == 0 /* TODO: && S_ISDIR(st.st_mode) */) {
         // a bit hacky, just save the directory path
         ob->dst_directory = strdup(path);
         if (!ob->dst_directory) {
@@ -3884,7 +3895,10 @@ try {
         flags &= ~RNP_KEY_REMOVE_SUBKEYS;
     }
     if (flags) {
-        FFI_LOG(key->ffi, "Unknown flags: %" PRIu32, flags);
+        FFI_LOG(key->ffi,
+                "Unknown flags: %"
+                "u",
+                flags); // TODO:
         return RNP_ERROR_BAD_PARAMETERS;
     }
     if (!pub && !sec) {

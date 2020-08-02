@@ -37,7 +37,7 @@ bool
 rnp_file_exists(const char *path)
 {
     struct stat st;
-    return stat(path, &st) == 0 && S_ISREG(st.st_mode);
+    return stat(path, &st) == 0; // TODO: && S_ISREG(st.st_mode);
 }
 
 /* return the file modification time */

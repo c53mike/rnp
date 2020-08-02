@@ -28,9 +28,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#else
+#include <librepgp/uniwin.h>
+#endif
 
 #include <assert.h>
 #include <stdio.h>
@@ -138,19 +143,19 @@ rnp_key_store_write_to_path(rnp_key_store_t *key_store)
 
         struct stat path_stat;
         if (stat(key_store->path.c_str(), &path_stat) != -1) {
-            if (!S_ISDIR(path_stat.st_mode)) {
+            /* TODO: if (!S_ISDIR(path_stat.st_mode)) {
                 RNP_LOG("G10 keystore should be a directory: %s", key_store->path.c_str());
                 return false;
-            }
+            } */
         } else {
             if (errno != ENOENT) {
                 RNP_LOG("stat(%s): %s", key_store->path.c_str(), strerror(errno));
                 return false;
             }
-            if (RNP_MKDIR(key_store->path.c_str(), S_IRWXU) != 0) {
+            /* TODO: if (RNP_MKDIR(key_store->path.c_str(), S_IRWXU) != 0) {
                 RNP_LOG("mkdir(%s, S_IRWXU): %s", key_store->path.c_str(), strerror(errno));
                 return false;
-            }
+            } */
         }
 
         for (auto &key : key_store->keys) {

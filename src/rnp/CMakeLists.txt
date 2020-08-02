@@ -24,6 +24,17 @@
 
 # for the headers
 find_package(JSON-C 0.11 REQUIRED)
+if (MSVC)
+  find_path(GETOPT_INCLUDE_DIR
+    NAMES getopt.h
+  )
+  find_library(GETOPT_LIBRARY
+    NAMES getopt
+  )
+  find_path(DIRENT_INCLUDE_DIR
+    NAMES dirent.h
+  )
+endif()
 
 add_executable(rnp
   rnp.cpp
@@ -39,15 +50,30 @@ target_include_directories(rnp
     "${PROJECT_SOURCE_DIR}/src/lib"
     "${JSON-C_INCLUDE_DIRS}"
 )
+if (MSVC)
+  target_include_directories(rnp
+    PRIVATE
+      "${GETOPT_INCLUDE_DIR}"
+      "${DIRENT_INCLUDE_DIR}"
+    )
+endif()
 
 target_link_libraries(rnp
   PRIVATE
     librnp
     JSON-C::JSON-C
 )
+if (MSVC)
+  target_link_libraries(rnp
+    PRIVATE
+      "${GETOPT_LIBRARY}"
+    )
+endif()
 
 if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   target_link_libraries(rnp PRIVATE regex)
+elseif(MSVC)
+  add_compile_definitions(RNP_USE_STD_REGEX)
 endif()
 
 include(GNUInstallDirs)

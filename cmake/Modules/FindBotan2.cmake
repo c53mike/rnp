@@ -63,12 +63,21 @@ find_path(BOTAN2_INCLUDE_DIR
 )
 
 # find the library
-find_library(BOTAN2_LIBRARY
-  NAMES botan-2 libbotan-2
-  HINTS
-    ${PC_BOTAN2_LIBDIR}
-    ${PC_BOTAN2_LIBRARY_DIRS}
-)
+if (MSVC)
+  find_library(BOTAN2_LIBRARY
+    NAMES botan
+    HINTS
+      ${PC_BOTAN2_LIBDIR}
+      ${PC_BOTAN2_LIBRARY_DIRS}
+  )
+else()
+  find_library(BOTAN2_LIBRARY
+    NAMES botan-2 libbotan-2
+    HINTS
+      ${PC_BOTAN2_LIBDIR}
+      ${PC_BOTAN2_LIBRARY_DIRS}
+  )
+endif()
 
 # determine the version
 if(PC_BOTAN2_VERSION)
