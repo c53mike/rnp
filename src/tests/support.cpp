@@ -28,8 +28,13 @@
 #include "rnp_tests.h"
 #include "utils.h"
 
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/types.h>
 #include <sys/param.h>
+#else
+#include <librepgp/uniwin.h>
+#endif
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -37,6 +42,10 @@
 #include <crypto.h>
 #include <pgp-key.h>
 #include <fstream>
+
+#ifndef WINSHELLAPI
+#include <ftw.h>
+#endif
 
 extern rng_t global_rng;
 
@@ -229,10 +238,26 @@ delete_recursively(const char *path)
     /* sanity check, we should only be purging things from /tmp/ */
     assert_true(is_tmp_path(fullpath));
 
+#ifdef WINSHELLAPI
+	SHFILEOPSTRUCT FileOp; 
+	ZeroMemory((void*)&FileOp,sizeof(SHFILEOPSTRUCT));
+	FileOp.fFlags = FOF_NOCONFIRMATION |	FOF_NOCONFIRMMKDIR;
+    FileOp.pFrom = pFrom; 
+	FileOp.pTo = pTo; 
+	FileOp.wFunc = FO_COPY; 
+	FileOp.hNameMappings = NULL; 
+	FileOp.hwnd = NULL; 
+	FileOp.lpszProgressTitle = NULL; 
+
+	FileOp.wFunc = FO_COPY; 
+	int nret = SHFileOperation(&FileOp);
+	assert_true(nret == 0);
+#else
     nftw(path, remove_cb, 64, FTW_DEPTH | FTW_PHYS);
     if (*path != '/') {
         free(fullpath);
     }
+#endif
 }
 
 void
